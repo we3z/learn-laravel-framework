@@ -59,6 +59,7 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
      */
     public static function capture()
     {
+        // 开启路由参数重写
         static::enableHttpMethodParameterOverride();
 
         return static::createFromBase(SymfonyRequest::createFromGlobals());

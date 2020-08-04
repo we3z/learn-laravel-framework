@@ -201,7 +201,7 @@ abstract class Facade
 
     /**
      * Clear a resolved facade instance.
-     *
+     * 清除已解析的门面实例。
      * @param  string  $name
      * @return void
      */

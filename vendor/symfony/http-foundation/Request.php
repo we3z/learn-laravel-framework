@@ -285,7 +285,7 @@ class Request
 
     /**
      * Creates a new request with values from PHP's super globals.
-     *
+     * 使用PHP的super globals中的值创建一个新请求。
      * @return static
      */
     public static function createFromGlobals()

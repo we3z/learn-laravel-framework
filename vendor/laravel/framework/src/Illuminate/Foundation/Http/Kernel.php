@@ -101,6 +101,8 @@ class Kernel implements KernelContract
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
+     *
+     * 1.1 $request 一个实例化的Request对象，并且进行了相关处理
      */
     public function handle($request)
     {
@@ -130,11 +132,14 @@ class Kernel implements KernelContract
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
+     *
+     * 1.1 $request 一个实例化的Request对象，并且进行了相关处理
      */
     protected function sendRequestThroughRouter($request)
     {
-        $this->app->instance('request', $request);
 
+        $this->app->instance('request', $request);
+        // 把$request 注册到instance中
         Facade::clearResolvedInstance('request');
 
         $this->bootstrap();
@@ -147,7 +152,7 @@ class Kernel implements KernelContract
 
     /**
      * Bootstrap the application for HTTP requests.
-     *
+     * 为HTTP请求引导应用程序。
      * @return void
      */
     public function bootstrap()

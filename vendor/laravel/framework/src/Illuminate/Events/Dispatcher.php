@@ -198,6 +198,9 @@ class Dispatcher implements DispatcherContract
      * @param  mixed  $payload
      * @param  bool  $halt
      * @return array|null
+     *
+     * $event = 'bootstrapping: \Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables' $payload = [$app], $halt =
+     * false
      */
     public function dispatch($event, $payload = [], $halt = false)
     {

@@ -156,9 +156,12 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
         if ($basePath) {
             $this->setBasePath($basePath);
         }
-
+        // 1.1将相关的类绑定到类的bindings属性中
+        // 注册基础绑定
         $this->registerBaseBindings();
+        // 注册基础服务提供者
         $this->registerBaseServiceProviders();
+        // 注册核心容器别名
         $this->registerCoreContainerAliases();
     }
 
@@ -179,16 +182,23 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      */
     protected function registerBaseBindings()
     {
+        // 把实例化的Application对象放到静态变量instance中
         static::setInstance($this);
 
         $this->instance('app', $this);
 
-        $this->instance(Container::class, $this);
-        $this->singleton(Mix::class);
+        // Container::class = 'Illuminate\Container\Container'
 
+        $this->instance(Container::class, $this);
+        // 上面两部 绑定了 app 和 Illuminate\Container\Container 在 $this的 instances 变量中
+        // Mix::class = 'Illuminate\Foundation\Mix'
+        $this->singleton(Mix::class);
+        // 1.1 此时的$this中的binding放入了Illuminate\Foundation\Mix
+        // PackageManifest::class = "Illuminate\Foundation\PackageManifest"
         $this->instance(PackageManifest::class, new PackageManifest(
             new Filesystem, $this->basePath(), $this->getCachedPackagesPath()
         ));
+        // instance中放入 Illuminate\Foundation\PackageManifest 放入一些相关路径的信息
     }
 
     /**
@@ -199,8 +209,11 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     protected function registerBaseServiceProviders()
     {
         $this->register(new EventServiceProvider($this));
+        // Appcation $this中event的注册
         $this->register(new LogServiceProvider($this));
+        // Appcation $this中log的注册
         $this->register(new RoutingServiceProvider($this));
+        // Appcation $this中router的注册 这个动作中比较多
     }
 
     /**
@@ -211,8 +224,9 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      */
     public function bootstrapWith(array $bootstrappers)
     {
+        // 1.1 Illuminate\Foundation\Http\Kernel 过来的
         $this->hasBeenBootstrapped = true;
-
+        dd($this);
         foreach ($bootstrappers as $bootstrapper) {
             $this['events']->dispatch('bootstrapping: '.$bootstrapper, [$this]);
 
@@ -220,6 +234,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
 
             $this['events']->dispatch('bootstrapped: '.$bootstrapper, [$this]);
         }
+
     }
 
     /**
@@ -599,20 +614,23 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      * @param  \Illuminate\Support\ServiceProvider|string  $provider
      * @param  bool  $force
      * @return \Illuminate\Support\ServiceProvider
+     * 1.1 $provider =  EventServiceProvider的实例化对象，$force = false
      */
     public function register($provider, $force = false)
     {
+        // 获取已经注册的$provider,没有继续走
         if (($registered = $this->getProvider($provider)) && ! $force) {
             return $registered;
         }
-
         // If the given "provider" is a string, we will resolve it, passing in the
         // application instance automatically for the developer. This is simply
         // a more convenient way of specifying your service provider classes.
+        // 1.1 不是字符串
         if (is_string($provider)) {
             $provider = $this->resolveProvider($provider);
         }
-
+        // 进行注册
+        // 1.1 EventServiceProvider中的register();
         $provider->register();
 
         // If there are bindings / singletons set as properties on the provider we
@@ -629,24 +647,26 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
                 $this->singleton($key, $value);
             }
         }
-
+        // 把已经注册完毕的Provider $provider标记为Appcation $this中已注册
         $this->markAsRegistered($provider);
 
         // If the application has already booted, we will call this boot method on
         // the provider class so it has an opportunity to do its boot logic and
         // will be ready for any usage by this developer's application logic.
+        // 1.1 把event 注册时未启动
         if ($this->isBooted()) {
             $this->bootProvider($provider);
         }
-
         return $provider;
     }
 
     /**
      * Get the registered service provider instance if it exists.
-     *
+     * 获取已注册的服务提供程序实例（如果存在）。
      * @param  \Illuminate\Support\ServiceProvider|string  $provider
      * @return \Illuminate\Support\ServiceProvider|null
+     *
+     * 1.1 $provider =  EventServiceProvider的实例化对象
      */
     public function getProvider($provider)
     {
@@ -658,11 +678,15 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      *
      * @param  \Illuminate\Support\ServiceProvider|string  $provider
      * @return array
+     *
+     * 1.1 $provider =  EventServiceProvider的实例化对象
      */
     public function getProviders($provider)
     {
+        // get_class($obj) 返回对象的类名
         $name = is_string($provider) ? $provider : get_class($provider);
 
+        // 返回 $this->serviceProviders 属于 $name 类的 数组，不属于的过滤掉
         return Arr::where($this->serviceProviders, function ($value) use ($name) {
             return $value instanceof $name;
         });
@@ -711,18 +735,18 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
 
     /**
      * Load the provider for a deferred service.
-     *
+     * 为延迟服务加载提供程序。
      * @param  string  $service
      * @return void
+     * 1.1 $service = "Illuminate\Contracts\Http\Kernel"
      */
     public function loadDeferredProvider($service)
     {
+        // 1.1 确实没提供，继续走
         if (! $this->isDeferredService($service)) {
             return;
         }
-
         $provider = $this->deferredServices[$service];
-
         // If the service provider has not already been loaded and registered we can
         // register it with the application and remove the service from this list
         // of deferred services, since it will already be loaded on subsequent.
@@ -762,6 +786,8 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      * @param  string  $abstract
      * @param  array  $parameters
      * @return mixed
+     *
+     * 1.1 $abstract = "Illuminate\Contracts\Http\Kernel", $parameters = []
      */
     public function make($abstract, array $parameters = [])
     {
@@ -787,12 +813,15 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
 
     /**
      * Load the deferred provider if the given type is a deferred service and the instance has not been loaded.
-     *
+     * 如果给定类型是延迟服务且实例尚未加载，则加载延迟提供程序。
      * @param  string  $abstract
      * @return void
+     * 1.1 $abstract = "Illuminate\Contracts\Http\Kernel"
      */
     protected function loadDeferredProviderIfNeeded($abstract)
     {
+        // 需要提供但是没有提供，那就进行提供
+        // 1.1 $abstract = "Illuminate\Contracts\Http\Kernel" 并不是延迟服务
         if ($this->isDeferredService($abstract) && ! isset($this->instances[$abstract])) {
             $this->loadDeferredProvider($abstract);
         }
@@ -1112,9 +1141,10 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
 
     /**
      * Determine if the given service is a deferred service.
-     *
+     * 确定给定服务是否为延迟服务。
      * @param  string  $service
      * @return bool
+     *  $service = "Illuminate\Contracts\Http\Kernel"
      */
     public function isDeferredService($service)
     {

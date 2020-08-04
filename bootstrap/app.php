@@ -12,9 +12,10 @@
 */
 
 $app = new Illuminate\Foundation\Application(
+    // 获取路径文件夹名称
     $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
 );
-
+// 实例化了Applicants对象$app, 并完成一些基础类的绑定，赋值在$app属性中
 /*
 |--------------------------------------------------------------------------
 | Bind Important Interfaces
@@ -25,22 +26,22 @@ $app = new Illuminate\Foundation\Application(
 | incoming requests to this application from both the web and CLI.
 |
 */
-
 $app->singleton(
     Illuminate\Contracts\Http\Kernel::class,
     App\Http\Kernel::class
 );
-
+// 绑定 "Illuminate\Contracts\Http\Kernel"
 $app->singleton(
     Illuminate\Contracts\Console\Kernel::class,
     App\Console\Kernel::class
 );
-
+// 绑定 "Illuminate\Contracts\Console\Kernel"
 $app->singleton(
     Illuminate\Contracts\Debug\ExceptionHandler::class,
     App\Exceptions\Handler::class
 );
 
+// 绑定 "Illuminate\Contracts\Debug\ExceptionHandler"
 /*
 |--------------------------------------------------------------------------
 | Return The Application

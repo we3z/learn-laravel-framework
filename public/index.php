@@ -20,7 +20,7 @@ define('LARAVEL_START', microtime(true));
 | loading any of our classes later on. It feels great to relax.
 |
 */
-
+// 加载composer下载vendor中的文件
 require __DIR__.'/../vendor/autoload.php';
 
 /*
@@ -35,8 +35,9 @@ require __DIR__.'/../vendor/autoload.php';
 |
 */
 
+// 调用app.php 获取 $app 类的实例化对象
 $app = require_once __DIR__.'/../bootstrap/app.php';
-
+// 完成所有的组测任务了
 /*
 |--------------------------------------------------------------------------
 | Run The Application
@@ -50,10 +51,12 @@ $app = require_once __DIR__.'/../bootstrap/app.php';
 */
 
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
-
+// 返回了 "App\Http\Kernel" 实例化对象
 $response = $kernel->handle(
+    // 获取一个处理完毕的Request对象
     $request = Illuminate\Http\Request::capture()
 );
+// 通过一系列的引导，绑定启动事件，通过中间件到达路由
 
 $response->send();
 

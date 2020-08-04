@@ -152,6 +152,7 @@ class Container implements ArrayAccess, ContainerContract
 
     /**
      * Determine if the given abstract type has been bound.
+     * 确定给定的抽象类型是否已绑定
      *
      * @param  string  $abstract
      * @return bool
@@ -176,13 +177,15 @@ class Container implements ArrayAccess, ContainerContract
      *
      * @param  string  $abstract
      * @return bool
+     * 1.1 $abstract = 'Illuminate\Foundation\Mix'
      */
     public function resolved($abstract)
     {
+        // 1.1 此时第一次进来肯定没有
         if ($this->isAlias($abstract)) {
             $abstract = $this->getAlias($abstract);
         }
-
+        // 1.1 两个参数都没有，所以返回false
         return isset($this->resolved[$abstract]) ||
                isset($this->instances[$abstract]);
     }
@@ -218,14 +221,20 @@ class Container implements ArrayAccess, ContainerContract
      * @param  \Closure|string|null  $concrete
      * @param  bool  $shared
      * @return void
+     *
+     * 1.1 $abstract = 'Illuminate\Foundation\Mix', $concrete = 'null', $shared = 'true'
+     * 1.2 $abstract = 'event', $concrete = 是一个闭包, $shared = 'true'
+     * 1.3 $abstract = 'Illuminate\Contracts\Http\Kernel', $concrete = 'App\Http\Kernel', $shared = 'true'
      */
     public function bind($abstract, $concrete = null, $shared = false)
     {
+        // 删除之前绑定和重命名中的类
         $this->dropStaleInstances($abstract);
 
         // If no concrete type was given, we will simply set the concrete type to the
         // abstract type. After that, the concrete type to be registered as shared
         // without being forced to state their classes in both of the parameters.
+        // 1.1 $abstract = 'Illuminate\Foundation\Mix', $concrete = 'Illuminate\Foundation\Mix'
         if (is_null($concrete)) {
             $concrete = $abstract;
         }
@@ -233,15 +242,21 @@ class Container implements ArrayAccess, ContainerContract
         // If the factory is not a Closure, it means it is just a class name which is
         // bound into this container to the abstract type and we will just wrap it
         // up inside its own Closure to give us more convenience when extending.
+        // 1.1 $concrete 为 'Illuminate\Foundation\Mix' 不是闭包, 那进去了
         if (! $concrete instanceof Closure) {
+            // 返回了一个闭包
             $concrete = $this->getClosure($abstract, $concrete);
         }
 
         $this->bindings[$abstract] = compact('concrete', 'shared');
-
+        // 1.1 binding['Illuminate\Foundation\Mix'] = ['concrete' => '一个闭包', 'shared' => 'true'];
+        // 1.2 binding['event'] = ['concrete' => '一个闭包', 'shared' => 'true'];
+        // 1.3 binding['Illuminate\Contracts\Http\Kernel'] = ['concrete' => '一个闭包', 'shared' => 'true'];
         // If the abstract type was already resolved in this container we'll fire the
         // rebound listener so that any objects which have already gotten resolved
         // can have their copy of the object updated via the listener callbacks.
+        // 如果抽象类型已经在这个容器中解析了，我们将触发反弹侦听器，这样任何已经解析的对象都可以通过侦听器回调更新其对象副本。
+        // 1.1 返回false所以没有执行绑定，
         if ($this->resolved($abstract)) {
             $this->rebound($abstract);
         }
@@ -253,14 +268,20 @@ class Container implements ArrayAccess, ContainerContract
      * @param  string  $abstract
      * @param  string  $concrete
      * @return \Closure
+     * 1.1 $abstract = 'Illuminate\Foundation\Mix', $concrete = 'Illuminate\Foundation\Mix';
+     * 1.2 $abstract = 'Illuminate\Contracts\Http\Kernel', $concrete = 'App\Http\Kernel'
      */
     protected function getClosure($abstract, $concrete)
     {
+        // 1.1 返回一个闭包,use记录了当时的参数,因为没有调用所以数据没有执行
+
+        // 1.2 make 执行闭包  $container = Application实例化对象,$parameters = [],$abstract =
+        // "Illuminate\Contracts\Http\Kernel", $concrete =
+        // "App\Http\Kernel"
         return function ($container, $parameters = []) use ($abstract, $concrete) {
             if ($abstract == $concrete) {
                 return $container->build($concrete);
             }
-
             return $container->resolve(
                 $concrete, $parameters, $raiseEvents = false
             );
@@ -351,6 +372,10 @@ class Container implements ArrayAccess, ContainerContract
      * @param  string  $abstract
      * @param  \Closure|string|null  $concrete
      * @return void
+     *
+     * 1.1 $abstract = 'Illuminate\Foundation\Mix', $concrete = null
+     * 1.2 $abstract = 'event' $concrete 是一个闭包
+     * 1.3 $abstract = 'Illuminate\Contracts\Http\Kernel', $concrete = 'App\Http\Kernel'
      */
     public function singleton($abstract, $concrete = null)
     {
@@ -403,24 +428,31 @@ class Container implements ArrayAccess, ContainerContract
      * @param  string  $abstract
      * @param  mixed  $instance
      * @return mixed
+     * 1.1 $abstract = app, $instance = 类Application的实例化对象
      */
     public function instance($abstract, $instance)
     {
+        // 删除已经重命名的类
         $this->removeAbstractAlias($abstract);
 
+        // 判读类是否已经绑定
         $isBound = $this->bound($abstract);
 
+        // 删除已经重命名的类
         unset($this->aliases[$abstract]);
 
         // We'll check to determine if this type has been bound before, and if it has
         // we will fire the rebound callbacks registered with the container and it
         // can be updated with consuming classes that have gotten resolved here.
+        // 把新生成的对象放到instances成员变量中去
         $this->instances[$abstract] = $instance;
 
+        // 如果已经绑定了
         if ($isBound) {
             $this->rebound($abstract);
         }
 
+        // 返回 $instance = 类Application的实例化对象
         return $instance;
     }
 
@@ -429,13 +461,16 @@ class Container implements ArrayAccess, ContainerContract
      *
      * @param  string  $searched
      * @return void
+     * 1.1 $searched = 'app'
      */
     protected function removeAbstractAlias($searched)
     {
+        // 1.1判断当前类的实例化对象中是否有 'app', 没有就返回
         if (! isset($this->aliases[$searched])) {
             return;
         }
 
+        // 有就删除了
         foreach ($this->abstractAliases as $abstract => $aliases) {
             foreach ($aliases as $index => $alias) {
                 if ($alias == $searched) {
@@ -539,22 +574,24 @@ class Container implements ArrayAccess, ContainerContract
 
     /**
      * Fire the "rebound" callbacks for the given abstract type.
-     *
+     * 重新绑定
      * @param  string  $abstract
      * @return void
      */
     protected function rebound($abstract)
     {
+        // 实例化这个 $abstract 类
         $instance = $this->make($abstract);
 
         foreach ($this->getReboundCallbacks($abstract) as $callback) {
+            // call_user_func 把第一个参数作为回调函数调用
             call_user_func($callback, $this, $instance);
         }
     }
 
     /**
      * Get the rebound callbacks for a given type.
-     *
+     * 获取给定类型的反弹回调
      * @param  string  $abstract
      * @return array
      */
@@ -623,6 +660,8 @@ class Container implements ArrayAccess, ContainerContract
      * @return mixed
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     *
+     * 1.1 $abstract = "Illuminate\Contracts\Http\Kernel", $parameters = []
      */
     public function make($abstract, array $parameters = [])
     {
@@ -654,18 +693,24 @@ class Container implements ArrayAccess, ContainerContract
      * @return mixed
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     *
+     * 1.1 $abstract = "Illuminate\Contracts\Http\Kernel", $parameters = [], $raiseEvents = true
+     * 1.2 $abstract = "App\Http\Kernel",$parameters = [], $raiseEvents = false
      */
     protected function resolve($abstract, $parameters = [], $raiseEvents = true)
     {
         $abstract = $this->getAlias($abstract);
-
         $needsContextualBuild = ! empty($parameters) || ! is_null(
             $this->getContextualConcrete($abstract)
         );
 
+        // 1.1 $needsContextualBuild = false
+        // 1.2 $needsContextualBuild = false
+
         // If an instance of the type is currently being managed as a singleton we'll
         // just return an existing instance instead of instantiating new instances
         // so the developer can keep using the same objects instance every time.
+
         if (isset($this->instances[$abstract]) && ! $needsContextualBuild) {
             return $this->instances[$abstract];
         }
@@ -673,12 +718,17 @@ class Container implements ArrayAccess, ContainerContract
         $this->with[] = $parameters;
 
         $concrete = $this->getConcrete($abstract);
+        // 1.1 得到了binding 中 "Illuminate\Contracts\Http\Kernel" 的闭包函数
+        // 1.2 得到字符串 "App\Http\Kernel"
 
         // We're ready to instantiate an instance of the concrete type registered for
         // the binding. This will instantiate the types, as well as resolve any of
         // its "nested" dependencies recursively until all have gotten resolved.
         if ($this->isBuildable($concrete, $abstract)) {
+            // 1.1 $concrete是闭包 是true 走这个
+            // 1.2 $concrete和$abstract都是"App\Http\Kernel"，true
             $object = $this->build($concrete);
+            // 返回了 "App\Http\Kernel"实例化对象
         } else {
             $object = $this->make($concrete);
         }
@@ -716,6 +766,7 @@ class Container implements ArrayAccess, ContainerContract
      *
      * @param  string  $abstract
      * @return mixed
+     * 1.1 $abstract = "Illuminate\Contracts\Http\Kernel"
      */
     protected function getConcrete($abstract)
     {
@@ -727,7 +778,9 @@ class Container implements ArrayAccess, ContainerContract
         // assume each type is a concrete name and will attempt to resolve it as is
         // since the container should be able to resolve concretes automatically.
         if (isset($this->bindings[$abstract])) {
+            // $this->bindings["Illuminate\Contracts\Http\Kernel"] 存在的
             return $this->bindings[$abstract]['concrete'];
+            // 返回这个闭包函数
         }
 
         return $abstract;
@@ -735,6 +788,7 @@ class Container implements ArrayAccess, ContainerContract
 
     /**
      * Get the contextual concrete binding for the given abstract.
+     * 获取给定摘要的上下文具体绑定。
      *
      * @param  string  $abstract
      * @return \Closure|string|null
@@ -776,10 +830,12 @@ class Container implements ArrayAccess, ContainerContract
      * @param  mixed  $concrete
      * @param  string  $abstract
      * @return bool
+     * 1.1 $concrete = binding 中 "Illuminate\Contracts\Http\Kernel" 的闭包函数, $abstract = "Illuminate\Contracts\Http\Kernel"
      */
     protected function isBuildable($concrete, $abstract)
     {
         return $concrete === $abstract || $concrete instanceof Closure;
+        // 1.1 返回了true $concrete instanceof Closure 是true
     }
 
     /**
@@ -789,6 +845,9 @@ class Container implements ArrayAccess, ContainerContract
      * @return mixed
      *
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     *
+     * 1.1 $concrete = binding 中 "Illuminate\Contracts\Http\Kernel" 的闭包函数
+     * 1.2 $concrete = "App\Http\Kernel"
      */
     public function build($concrete)
     {
@@ -799,6 +858,7 @@ class Container implements ArrayAccess, ContainerContract
             return $concrete($this, $this->getLastParameterOverride());
         }
 
+        // 1.2 通过反射生成"App\Http\Kernel"的实例化对象
         try {
             $reflector = new ReflectionClass($concrete);
         } catch (ReflectionException $e) {
@@ -1154,7 +1214,7 @@ class Container implements ArrayAccess, ContainerContract
 
     /**
      * Drop all of the stale instances and aliases.
-     *
+     * 删除之前绑定和重命名中的类
      * @param  string  $abstract
      * @return void
      */
