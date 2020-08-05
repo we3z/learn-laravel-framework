@@ -12,5 +12,7 @@
 */
 
 Route::get('/', function () {
+    app('Family')->testAbc();
+    die;
     return view('welcome');
 });

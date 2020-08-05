@@ -165,7 +165,7 @@ return [
         /*
          * Package Service Providers...
          */
-
+        Yansongda\LaravelPay\PayServiceProvider::class,
         /*
          * Application Service Providers...
          */
@@ -174,6 +174,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\FamilyServiceProvider::class,
 
     ],
 
@@ -226,6 +227,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
 
+        'Pay' => Yansongda\LaravelPay\Facades\Pay::class,
     ],
 
 ];

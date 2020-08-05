@@ -226,7 +226,6 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     {
         // 1.1 Illuminate\Foundation\Http\Kernel 过来的
         $this->hasBeenBootstrapped = true;
-        dd($this);
         foreach ($bootstrappers as $bootstrapper) {
             $this['events']->dispatch('bootstrapping: '.$bootstrapper, [$this]);
 
