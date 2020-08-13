@@ -220,17 +220,27 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      * Run the given array of bootstrap classes.
      *
      * @param  string[]  $bootstrappers
+     * 1. [  \Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables::class,
+     *      \Illuminate\Foundation\Bootstrap\LoadConfiguration::class,
+     *      \Illuminate\Foundation\Bootstrap\HandleExceptions::class,
+     *      \Illuminate\Foundation\Bootstrap\RegisterFacades::class,
+     *      \Illuminate\Foundation\Bootstrap\RegisterProviders::class,
+     *      \Illuminate\Foundation\Bootstrap\BootProviders::class, ]
      * @return void
      */
     public function bootstrapWith(array $bootstrappers)
     {
         // 1.1 Illuminate\Foundation\Http\Kernel 过来的
         $this->hasBeenBootstrapped = true;
+
         foreach ($bootstrappers as $bootstrapper) {
             $this['events']->dispatch('bootstrapping: '.$bootstrapper, [$this]);
 
-            $this->make($bootstrapper)->bootstrap($this);
+            // 1. \Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables
 
+            // 5. \Illuminate\Foundation\Bootstrap\RegisterProviders::class
+            $this->make($bootstrapper)->bootstrap($this);
+            // 启动并设置环境变量及一些不可变的变量
             $this['events']->dispatch('bootstrapped: '.$bootstrapper, [$this]);
         }
 
@@ -591,16 +601,16 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
 
     /**
      * Register all of the configured providers.
-     *
+     * 注册所有配置的提供程序。
      * @return void
      */
     public function registerConfiguredProviders()
     {
+        // Illuminate\Support\Collection 静态对象
         $providers = Collection::make($this->config['app.providers'])
                         ->partition(function ($provider) {
                             return strpos($provider, 'Illuminate\\') === 0;
                         });
-
         $providers->splice(1, 0, [$this->make(PackageManifest::class)->providers()]);
 
         (new ProviderRepository($this, new Filesystem, $this->getCachedServicesPath()))
@@ -965,7 +975,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
 
     /**
      * Determine if the application configuration is cached.
-     *
+     * 确定是否缓存应用程序配置
      * @return bool
      */
     public function configurationIsCached()
@@ -975,7 +985,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
 
     /**
      * Get the path to the configuration cache file.
-     *
+     * 获取配置缓存文件的路径。
      * @return string
      */
     public function getCachedConfigPath()
@@ -1025,7 +1035,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
 
     /**
      * Normalize a relative or absolute path to a cache file.
-     *
+     * 规范化缓存文件的相对或绝对路径。
      * @param  string  $key
      * @param  string  $default
      * @return string
@@ -1086,7 +1096,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
 
     /**
      * Terminate the application.
-     *
+     * 终止应用程序。
      * @return void
      */
     public function terminate()

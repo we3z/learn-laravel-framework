@@ -74,7 +74,6 @@ class ProviderRepository
         foreach ($manifest['eager'] as $provider) {
             $this->app->register($provider);
         }
-
         $this->app->addDeferredServices($manifest['deferred']);
     }
 

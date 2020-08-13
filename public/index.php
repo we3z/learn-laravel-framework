@@ -54,6 +54,7 @@ $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 // 返回了 "App\Http\Kernel" 实例化对象
 $response = $kernel->handle(
     // 获取一个处理完毕的Request对象
+    //1 $request = Symfony\Component\HttpFoundation\Request 静态对象
     $request = Illuminate\Http\Request::capture()
 );
 // 通过一系列的引导，绑定启动事件，通过中间件到达路由

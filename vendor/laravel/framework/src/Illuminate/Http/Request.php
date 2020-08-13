@@ -54,14 +54,14 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 
     /**
      * Create a new Illuminate HTTP request from server variables.
-     *
+     * 从服务器变量创建一个新的Illuminate HTTP请求。
      * @return static
      */
     public static function capture()
     {
         // 开启路由参数重写
         static::enableHttpMethodParameterOverride();
-
+        // SymfonyRequest::createFromGlobals() 返回 Symfony\Component\HttpFoundation\Request 静态对象
         return static::createFromBase(SymfonyRequest::createFromGlobals());
     }
 
@@ -418,8 +418,11 @@ class Request extends SymfonyRequest implements Arrayable, ArrayAccess
 
     /**
      * Create an Illuminate request from a Symfony instance.
+     * 从Symfony实例创建照明请求。
      *
      * @param  \Symfony\Component\HttpFoundation\Request  $request
+     *
+     * 1. $request = Symfony\Component\HttpFoundation\Request 静态对象
      * @return static
      */
     public static function createFromBase(SymfonyRequest $request)

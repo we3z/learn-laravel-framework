@@ -290,15 +290,18 @@ class Request
      */
     public static function createFromGlobals()
     {
+        // 从请求厂库中回去一个静态的实例化对象
         $request = self::createRequestFromFactory($_GET, $_POST, [], $_COOKIE, $_FILES, $_SERVER);
-
+        // 通过判断请求的 网络文件的类型和网页的编码 和 请求当时，如果不是框架中常用的，我们需要解析
         if (0 === strpos($request->headers->get('CONTENT_TYPE'), 'application/x-www-form-urlencoded')
             && \in_array(strtoupper($request->server->get('REQUEST_METHOD', 'GET')), ['PUT', 'DELETE', 'PATCH'])
         ) {
+            // 从字符串中解析变量数据，然后
             parse_str($request->getContent(), $data);
+            // 数据化对象数据放入request中request
             $request->request = new ParameterBag($data);
         }
-
+        // 返回Request 请求
         return $request;
     }
 

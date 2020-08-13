@@ -352,7 +352,7 @@ trait EnumeratesValues
 
     /**
      * Partition the collection into two arrays using the given callback or key.
-     *
+     * 使用给定的回调或键将集合划分为两个数组。
      * @param  callable|string  $key
      * @param  mixed  $operator
      * @param  mixed  $value

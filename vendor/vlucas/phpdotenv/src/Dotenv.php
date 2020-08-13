@@ -82,7 +82,7 @@ class Dotenv
 
     /**
      * Load environment file in given directory, silently failing if it doesn't exist.
-     *
+     * 在给定的目录中加载环境文件，如果不存在，则自动失败。
      * @throws \Dotenv\Exception\InvalidFileException
      *
      * @return array<string|null>
@@ -111,7 +111,7 @@ class Dotenv
 
     /**
      * Actually load the data.
-     *
+     * 实际加载数据。
      * @param bool $overload
      *
      * @throws \Dotenv\Exception\InvalidPathException|\Dotenv\Exception\InvalidFileException

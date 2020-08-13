@@ -198,6 +198,12 @@ D: 匿名函数+use就是闭包
 
 （因为服务容器实现了依赖注入，能更好的管理类之间的依赖关系）
 
+##### Laravel Service Provider 中 boot 方法和 register 方法的区别
+
+register 方法用于绑定服务到容器，框架会先调用所有 provider 的 register 方法，等所有服务都注册完毕再去调用每一个服务的 boot 方法。
+
+所以不能在 register 方法里面调用其他 provider 提供的服务，因为我们无法保证其他服务已经注册完毕。而在 boot 方法里面你可以干任何事情！
+
 #### 2.ServiceContainer
 
 Container类 register方法 调用 servicProvider类中的register方法，并把这些注册的类放入$app的 bindings 属性中
@@ -213,3 +219,7 @@ new self 返回自己静态变量的实例化
 new static 延迟加载
 
 ### 研究php Exception 异常处理
+
+### 事件
+
+#### 1.设置事件和监听者，并处理相关关系

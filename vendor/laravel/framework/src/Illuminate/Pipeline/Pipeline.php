@@ -53,7 +53,7 @@ class Pipeline implements PipelineContract
 
     /**
      * Set the object being sent through the pipeline.
-     *
+     * 设置通过管道发送的对象。
      * @param  mixed  $passable
      * @return $this
      */
@@ -92,7 +92,7 @@ class Pipeline implements PipelineContract
 
     /**
      * Run the pipeline with a final destination callback.
-     *
+     * 获取路由调度程序回调。
      * @param  \Closure  $destination
      * @return mixed
      */

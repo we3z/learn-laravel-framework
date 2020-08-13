@@ -102,13 +102,16 @@ class Kernel implements KernelContract
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      *
-     * 1.1 $request 一个实例化的Request对象，并且进行了相关处理
+     * 1.1 $request = Symfony\Component\HttpFoundation\Request 静态对象，并且进行了相关处理
+     *
      */
     public function handle($request)
     {
         try {
+            // 启用http方法参数重写
             $request->enableHttpMethodParameterOverride();
 
+            // 通过路由发送请求，获取
             $response = $this->sendRequestThroughRouter($request);
         } catch (Exception $e) {
             $this->reportException($e);
@@ -133,7 +136,7 @@ class Kernel implements KernelContract
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      *
-     * 1.1 $request 一个实例化的Request对象，并且进行了相关处理
+     * 1.1 $request = Symfony\Component\HttpFoundation\Request 静态对象
      */
     protected function sendRequestThroughRouter($request)
     {
@@ -141,13 +144,19 @@ class Kernel implements KernelContract
         $this->app->instance('request', $request);
         // 把$request 注册到instance中
         Facade::clearResolvedInstance('request');
+        // 清理已解析的request，因为我们现在只是放入instance中注册，但是还没有使用
 
         $this->bootstrap();
+        // 设置一些环境变量，设置一些变量
 
         return (new Pipeline($this->app))
                     ->send($request)
                     ->through($this->app->shouldSkipMiddleware() ? [] : $this->middleware)
                     ->then($this->dispatchToRouter());
+        // 1. 实例化Pipeline 对象 Illuminate\Routing\Pipeline
+        // 2. send 设置通过管道发送的对象。$app $pipeline->passable
+        // 3. through 设置管道阵，即使用那些管道 。  shouldSkipMiddleware 获取 应该跳过额中间件
+        // 4. 使用最终目标回调运行管道。
     }
 
     /**
@@ -164,7 +173,7 @@ class Kernel implements KernelContract
 
     /**
      * Get the route dispatcher callback.
-     *
+     * 获取路由调度程序回调。
      * @return \Closure
      */
     protected function dispatchToRouter()
@@ -178,7 +187,7 @@ class Kernel implements KernelContract
 
     /**
      * Call the terminate method on any terminable middleware.
-     *
+     * 在任何可终止的中间件上调用terminate方法。
      * @param  \Illuminate\Http\Request  $request
      * @param  \Illuminate\Http\Response  $response
      * @return void
@@ -192,7 +201,7 @@ class Kernel implements KernelContract
 
     /**
      * Call the terminate method on any terminable middleware.
-     *
+     * 在任何可终止的中间件上调用terminate方法。
      * @param  \Illuminate\Http\Request  $request
      * @param  \Illuminate\Http\Response  $response
      * @return void

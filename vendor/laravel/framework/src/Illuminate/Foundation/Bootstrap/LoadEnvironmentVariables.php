@@ -13,9 +13,12 @@ class LoadEnvironmentVariables
 {
     /**
      * Bootstrap the given application.
+     * 引导给定的应用程序
      *
      * @param  \Illuminate\Contracts\Foundation\Application  $app
      * @return void
+     *
+     * 1.1 Bootstrap
      */
     public function bootstrap(Application $app)
     {
@@ -34,7 +37,7 @@ class LoadEnvironmentVariables
 
     /**
      * Detect if a custom environment file matching the APP_ENV exists.
-     *
+     * 检测是否存在与应用程序环境匹配的自定义环境文件。
      * @param  \Illuminate\Contracts\Foundation\Application  $app
      * @return void
      */
@@ -79,7 +82,7 @@ class LoadEnvironmentVariables
 
     /**
      * Create a Dotenv instance.
-     *
+     * 创建一个Dotenv实例。
      * @param  \Illuminate\Contracts\Foundation\Application  $app
      * @return \Dotenv\Dotenv
      */

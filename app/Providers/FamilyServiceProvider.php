@@ -6,11 +6,13 @@ use App\Service\Family\FamilyService;
 use App\Service\Family\PersonService;
 use App\Service\Family\TvService;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
 
-class FamilyServiceProvider extends ServiceProvider
+class FamilyServiceProvider extends ServiceProvider implements DeferrableProvider
 {
 
+    protected $defer = false;
     /**
      * Register services.
      *
@@ -40,5 +42,10 @@ class FamilyServiceProvider extends ServiceProvider
     public function boot()
     {
         //
+    }
+
+    public function provides()
+    {
+        return ['Family'];
     }
 }

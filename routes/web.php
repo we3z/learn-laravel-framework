@@ -12,7 +12,16 @@
 */
 
 Route::get('/', function () {
-    app('Family')->testAbc();
-    die;
-    return view('welcome');
+
+});
+
+Route::get('/sp', function(){
+    //1. app('Family')->testAbc();
+
+    //2.app('app')->bind('app', 'App/Providers/FamilyServiceProvider');
+    //app('Family')->testAbc();
+});
+
+Route::get('/event', function (){
+    event(new \App\Events\TestEvent());
 });

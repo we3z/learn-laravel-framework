@@ -193,13 +193,13 @@ class Dispatcher implements DispatcherContract
 
     /**
      * Fire an event and call the listeners.
-     *
+     * 激活时间并且调用监听器
      * @param  string|object  $event
-     * @param  mixed  $payload
+     * @param  mixed  $payload 有效负载
      * @param  bool  $halt
      * @return array|null
      *
-     * $event = 'bootstrapping: \Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables' $payload = [$app], $halt =
+     * 1.1$event = 'bootstrapping: \Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables', $payload = [$app], $halt =
      * false
      */
     public function dispatch($event, $payload = [], $halt = false)
@@ -210,13 +210,15 @@ class Dispatcher implements DispatcherContract
         [$event, $payload] = $this->parseEventAndPayload(
             $event, $payload
         );
-
+        // 1.1$event =  'bootstrapping: \Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables' $payload = [$app]
+        // 判断是是否广播的时间，如果是实例化对象并放入队列
         if ($this->shouldBroadcast($payload)) {
             $this->broadcastEvent($payload[0]);
         }
 
         $responses = [];
 
+        // 获取事件的监听器 遍历处理
         foreach ($this->getListeners($event) as $listener) {
             $response = $listener($event, $payload);
 
@@ -242,10 +244,12 @@ class Dispatcher implements DispatcherContract
 
     /**
      * Parse the given event and payload and prepare them for dispatching.
-     *
+     * 解析给定的事件和有效负载，并为分派做好准备
      * @param  mixed  $event
      * @param  mixed  $payload
      * @return array
+     *
+     * $event = 'bootstrapping: \Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables' $payload = [$app]
      */
     protected function parseEventAndPayload($event, $payload)
     {
@@ -258,7 +262,7 @@ class Dispatcher implements DispatcherContract
 
     /**
      * Determine if the payload has a broadcastable event.
-     *
+     * 确定有效负载是否具有可广播事件
      * @param  array  $payload
      * @return bool
      */
@@ -289,11 +293,13 @@ class Dispatcher implements DispatcherContract
      */
     protected function broadcastEvent($event)
     {
+        // 广播事件， 生成时间对象并放入队列中
         $this->container->make(BroadcastFactory::class)->queue($event);
     }
 
     /**
      * Get all of the listeners for a given event name.
+     * 获取给定事件名的所有侦听器。
      *
      * @param  string  $eventName
      * @return array
@@ -304,6 +310,7 @@ class Dispatcher implements DispatcherContract
 
         $listeners = array_merge(
             $listeners,
+            // 判断通用的监听器缓存，如果没有就去获取通用的监听器
             $this->wildcardsCache[$eventName] ?? $this->getWildcardListeners($eventName)
         );
 
@@ -314,9 +321,11 @@ class Dispatcher implements DispatcherContract
 
     /**
      * Get the wildcard listeners for the event.
-     *
+     * 获取事件的通配符侦听器。
      * @param  string  $eventName
      * @return array
+     *
+     * 1.$eventName = 'bootstrapping: \Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables'
      */
     protected function getWildcardListeners($eventName)
     {
@@ -333,10 +342,12 @@ class Dispatcher implements DispatcherContract
 
     /**
      * Add the listeners for the event's interfaces to the given array.
-     *
+     * 将事件接口的侦听器添加到给定数组。
      * @param  string  $eventName
      * @param  array  $listeners
      * @return array
+     *
+     * 1.$eventName = 'bootstrapping: \Illuminate\Foundation\Bootstrap\LoadEnvironmentVariables' 2 监听器类的数组
      */
     protected function addInterfaceListeners($eventName, array $listeners = [])
     {

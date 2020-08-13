@@ -215,7 +215,7 @@ class Str
 
     /**
      * Determine if a given string matches a given pattern.
-     *
+     * 确定给定字符串是否与给定模式匹配。
      * @param  string|array  $pattern
      * @param  string  $value
      * @return bool

@@ -64,7 +64,7 @@ class Loader
 
     /**
      * Set immutable value.
-     *
+     * 设置不可变值。
      * @param bool $immutable
      *
      * @return $this
